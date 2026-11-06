@@ -1,0 +1,6 @@
+{
+  "name": "PSY",
+  "description": "2D tactical jetpack shooter featuring Parth, Siddharth, and Yug, sniper scope zoom-out, medkit inventory, and upgradable combat pets led by Sheru.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
