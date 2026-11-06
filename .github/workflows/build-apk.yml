@@ -1,0 +1,115 @@
+name: Build & Release Android APK (PSY Arena)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-apk:
+    name: Build PSY-Arena.apk & Publish to GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up JDK 21 for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Normalize package.json for Public npm & Build Web Assets
+        run: |
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.dependencies = {
+              "react": "^19.0.0",
+              "react-dom": "^19.0.0",
+              "lucide-react": "^0.475.0"
+            };
+            pkg.devDependencies = {
+              "@tailwindcss/vite": "^4.0.9",
+              "@types/node": "^22.10.0",
+              "@types/react": "^19.0.0",
+              "@types/react-dom": "^19.0.0",
+              "@vitejs/plugin-react": "^4.3.4",
+              "tailwindcss": "^4.0.9",
+              "typescript": "^5.7.3",
+              "vite": "^6.2.0"
+            };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));
+          '
+          npm install --legacy-peer-deps
+          npm run build
+
+      - name: Install Capacitor & Generate Android Project
+        run: |
+          npm install @capacitor/core@^7.0.0 @capacitor/cli@^7.0.0 @capacitor/android@^7.0.0 --save --legacy-peer-deps
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      - name: Build Android APK with Gradle
+        working-directory: ./android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Copy APK to PSY-Arena.apk and release/ folder
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk PSY-Arena.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/PSY-Arena.apk
+
+      - name: Upload PSY-Arena.apk to Workflow Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PSY-Arena-APK
+          path: PSY-Arena.apk
+          if-no-files-found: error
+
+      - name: Commit PSY-Arena.apk into /release folder in Repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout ${{ github.ref_name }} || true
+          git add -f release/PSY-Arena.apk
+          git commit -m "chore(release): add compiled PSY-Arena.apk [skip ci]" || true
+          git push origin HEAD:${{ github.ref_name }} || true
+
+      - name: Create GitHub Release (v1.0.0) & Attach PSY-Arena.apk
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f v1.0.0
+          git push origin v1.0.0 --force
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            gh release upload v1.0.0 PSY-Arena.apk --clobber
+          else
+            gh release create v1.0.0 PSY-Arena.apk \
+              --title "PSY Arena v1.0.0 — Android APK" \
+              --notes "### PSY — 2D Tactical Jetpack Arena (Android APK)
+          - **Operatives**: Parth (\`P\`), Siddharth (\`S\`), and Yug (\`Y\`)
+          - **Default Player Name**: \`PSY Player\`
+          - **Features**: Sniper Scope Zoom-Out (\`1X\` -> \`0.5X\`), Ground Weapon Pickups, 10-Medkit Instant Heal Inventory, and 5 Companion Pets (**1. Sheru**, **2. Wolfs**, **3. Draky**, **4. Pegasus**, **5. Poink**).
+          - Download **\`PSY-Arena.apk\`** below under **Assets** and install on any Android device."
+          fi

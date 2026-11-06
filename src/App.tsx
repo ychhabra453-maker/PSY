@@ -2486,19 +2486,19 @@ export default function App() {
             <div className="p-4 rounded-2xl bg-[#140F24] border border-[#382B59] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-[#B67CFF] uppercase">
-                  OPTION 2 · BUILD APK IN GITHUB ACTIONS
+                  OPTION 2 · GITHUB RELEASE (v1.0.0) + /release/PSY-Arena.apk
                 </span>
                 <span className="text-[11px] font-mono text-[#18F2B2] font-bold">
-                  OAUTH EXPORT FIXED
+                  AUTO-RELEASE ACTIVE
                 </span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                GitHub blocks exporting repos that contain <code className="text-rose-300">.github/workflows/</code> via OAuth. We moved the workflow to <code className="text-amber-300">public/build-apk.yml</code> so <strong>Export to GitHub</strong> succeeds without error!
+                Configured at <code className="text-amber-300">.github/workflows/build-apk.yml</code>. On every push to GitHub, the workflow automatically compiles <strong>PSY-Arena.apk</strong> and attaches it directly into your repository&apos;s <strong>GitHub Releases (<code className="text-[#18F2B2]">v1.0.0</code>)</strong> and <code className="text-sky-300">/release/PSY-Arena.apk</code> folder!
               </p>
               <ol className="text-xs text-slate-200 space-y-1.5 list-decimal list-inside font-mono">
-                <li>Export this project to GitHub.</li>
-                <li>In your GitHub repo, create <code className="text-[#18F2B2]">.github/workflows/build-apk.yml</code> and paste the workflow below.</li>
-                <li>Download <strong>PSY-Arena.apk</strong> from your repo&apos;s <strong>Releases</strong> or <strong>Actions Artifacts</strong>!</li>
+                <li>Push or sync this repository to GitHub.</li>
+                <li>Wait ~2 minutes for the <strong>Build &amp; Release Android APK</strong> action to complete.</li>
+                <li>Open your GitHub repo&apos;s <strong>Releases</strong> tab (<code className="text-[#18F2B2]">v1.0.0</code>) or <code className="text-[#18F2B2]">/release/PSY-Arena.apk</code> to download the APK!</li>
               </ol>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <a
