@@ -4,31 +4,12 @@
 
 ---
 
-## 📱 Download Android APK on GitHub
+## 📱 How to Build & Download `PSY-Arena.apk` in GitHub
 
-This repository includes an automated **GitHub Actions Android APK Build & Release pipeline** at [`.github/workflows/build-apk.yml`](.github/workflows/build-apk.yml) powered by Capacitor & Gradle.
+> **Why isn't `.github/workflows/` pre-created?**
+> GitHub blocks OAuth apps from exporting repositories that contain `.github/workflows/*.yml` unless the OAuth token has the special `workflow` scope. To ensure **"Export to GitHub"** works without any error, the workflow template is stored at [`public/build-apk.yml`](public/build-apk.yml).
 
-### How to Get `PSY-Arena.apk` from GitHub:
-1. Push or sync this repository to GitHub (onto the `main` or `master` branch).
-2. Open the **Actions** tab in your GitHub repository → select **"Build Android APK (PSY Arena)"**.
-3. Once the workflow completes (~2 minutes):
-   - **Option A (GitHub Releases)**: Go to your repo's **Releases** section (`latest-apk` tag) and download **`PSY-Arena.apk`** directly onto your Android phone.
-   - **Option B (Workflow Artifacts)**: Open the completed workflow run and download **`PSY-Arena-APK`** under the **Artifacts** section.
-
----
-
-## 🛠️ Build `PSY-Arena.apk` Locally
-
-If you have Node.js and Android Studio / Android SDK installed locally:
-
-```bash
-npm install
-npm run build
-npm install @capacitor/core @capacitor/cli @capacitor/android --no-save
-npx cap add android
-npx cap sync android
-cd android && ./gradlew assembleDebug
-```
-
-The compiled APK will be generated at:
-`android/app/build/outputs/apk/debug/app-debug.apk`
+### Step-by-Step in GitHub (Takes 30 Seconds):
+1. Export or push this project to your GitHub repository.
+2. In your GitHub repo, click **Add file → Create new file**, name it **`.github/workflows/build-apk.yml`**, and paste the contents of [`public/build-apk.yml`](public/build-apk.yml) (or download it directly from the in-app **APK** button in the top bar).
+3. Commit the file — GitHub Actions will automatically build **`PSY-Arena.apk`** and publish it to your repository's **Releases (`latest-apk`)** and **Actions Artifacts**!

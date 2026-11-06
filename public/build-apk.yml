@@ -3,8 +3,6 @@ name: Build Android APK (PSY Arena)
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 permissions:
@@ -12,7 +10,7 @@ permissions:
 
 jobs:
   build-android-apk:
-    name: Build & Publish PSY-Arena.apk
+    name: Build & Release PSY-Arena.apk
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Set up JDK 21 for Android Gradle
         uses: actions/setup-java@v4
@@ -34,26 +31,46 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Web Dependencies & Build PSY Web Bundle
+      - name: Normalize package.json for Public npm & Build Web Assets
         run: |
-          npm install
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.dependencies = {
+              "react": "^19.0.0",
+              "react-dom": "^19.0.0",
+              "lucide-react": "^0.475.0"
+            };
+            pkg.devDependencies = {
+              "@tailwindcss/vite": "^4.0.0",
+              "@types/node": "^22.10.0",
+              "@types/react": "^19.0.0",
+              "@types/react-dom": "^19.0.0",
+              "@vitejs/plugin-react": "^4.3.4",
+              "tailwindcss": "^4.0.0",
+              "typescript": "^5.7.2",
+              "vite": "^6.1.0"
+            };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));
+          '
+          npm install --legacy-peer-deps
           npm run build
 
-      - name: Add Capacitor Android Platform & Sync Assets
+      - name: Install Capacitor & Generate Android Project
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android --no-save
+          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest --save --legacy-peer-deps
           if [ ! -d "android" ]; then
             npx cap add android
           fi
           npx cap sync android
 
-      - name: Build Android Debug APK with Gradle
+      - name: Build Android APK with Gradle
         working-directory: ./android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Rename APK to PSY-Arena.apk
+      - name: Prepare PSY-Arena.apk
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk PSY-Arena.apk
 
@@ -65,15 +82,9 @@ jobs:
           if-no-files-found: error
 
       - name: Publish PSY-Arena.apk to GitHub Releases
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-apk
-          name: "PSY Arena — Latest Android APK"
-          body: |
-            ### PSY — 2D Tactical Jetpack Arena (Android APK)
-            - **Operatives**: Parth (`P`), Siddharth (`S`), and Yug (`Y`)
-            - **Features**: Sniper Scope Zoom-Out (`1X` -> `0.5X`), Ground Weapon Pickups, 10-Medkit Instant Heal Inventory, and 5 Companion Pets (**1. Sheru**, **2. Wolfs**, **3. Draky**, **4. Pegasus**, **5. Poink**).
-            - Download **`PSY-Arena.apk`** below and install directly on any Android device.
+          name: "PSY Arena — Android APK"
           files: PSY-Arena.apk
           prerelease: false

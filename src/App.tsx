@@ -2483,23 +2483,47 @@ export default function App() {
             )}
 
             {/* GitHub Actions APK Build Workflow Details */}
-            <div className="p-4 rounded-2xl bg-[#140F24] border border-[#382B59] space-y-2.5">
+            <div className="p-4 rounded-2xl bg-[#140F24] border border-[#382B59] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-[#B67CFF] uppercase">
-                  OPTION 2 · GITHUB ACTIONS APK RELEASE
+                  OPTION 2 · BUILD APK IN GITHUB ACTIONS
                 </span>
                 <span className="text-[11px] font-mono text-[#18F2B2] font-bold">
-                  READY IN REPO
+                  OAUTH EXPORT FIXED
                 </span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                This project includes <code className="text-amber-300">.github/workflows/build-apk.yml</code> and <code className="text-amber-300">capacitor.config.json</code> (<code className="text-sky-300">com.psy.arena</code>).
+                GitHub blocks exporting repos that contain <code className="text-rose-300">.github/workflows/</code> via OAuth. We moved the workflow to <code className="text-amber-300">public/build-apk.yml</code> so <strong>Export to GitHub</strong> succeeds without error!
               </p>
               <ol className="text-xs text-slate-200 space-y-1.5 list-decimal list-inside font-mono">
-                <li>Push or export this project to your GitHub repository.</li>
-                <li>GitHub Actions automatically runs <strong>Build Android APK (PSY Arena)</strong> on every push to <code className="text-[#18F2B2]">main</code> / <code className="text-[#18F2B2]">master</code>.</li>
-                <li>Download <strong>PSY-Arena.apk</strong> directly from your repo&apos;s <strong>GitHub Releases (latest-apk)</strong> or workflow <strong>Artifacts</strong>!</li>
+                <li>Export this project to GitHub.</li>
+                <li>In your GitHub repo, create <code className="text-[#18F2B2]">.github/workflows/build-apk.yml</code> and paste the workflow below.</li>
+                <li>Download <strong>PSY-Arena.apk</strong> from your repo&apos;s <strong>Releases</strong> or <strong>Actions Artifacts</strong>!</li>
               </ol>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <a
+                  href="/build-apk.yml"
+                  download="build-apk.yml"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#442F6E] hover:bg-[#563C8B] border border-[#7656B8] text-white font-mono font-bold text-xs text-center uppercase cursor-pointer"
+                >
+                  Download build-apk.yml
+                </a>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/build-apk.yml');
+                      const txt = await res.text();
+                      await navigator.clipboard.writeText(txt);
+                      showToast('Copied build-apk.yml to clipboard!');
+                    } catch {
+                      showToast('Use Download build-apk.yml button!');
+                    }
+                  }}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#312252] hover:bg-[#412E6B] border border-[#18F2B2] text-[#18F2B2] font-mono font-bold text-xs uppercase cursor-pointer"
+                >
+                  Copy Workflow YAML
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-1">
