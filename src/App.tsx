@@ -37,6 +37,7 @@ import {
   WeaponIconSvg,
 } from './components/SpriteRenderer';
 import { soundFx } from './utils/soundFx';
+import { usePWAInstall } from './utils/usePWAInstall';
 
 type ScreenView =
   | 'HOME'
@@ -136,6 +137,8 @@ const MAP_CARDS = [
 export default function App() {
   const [screen, setScreen] = useState<ScreenView>('HOME');
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [showApkModal, setShowApkModal] = useState<boolean>(false);
+  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
 
   // Core Player Identity & Operatives (Parth, Siddharth, Yug)
   const [gamerTag, setGamerTag] = useState<string>('PSY Player');
@@ -485,9 +488,12 @@ export default function App() {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={handleSimulateGameXp}
-                title="Quick +100 XP Match Drill"
-                className="w-12 h-12 rounded-2xl bg-[#312252] hover:bg-[#3E2B66] border-2 border-[#6C4EA6] shadow-[0_4px_0_#1D1333] flex items-center justify-center text-white cursor-pointer"
+                onClick={() => {
+                  soundFx.playPickup();
+                  setShowApkModal(true);
+                }}
+                title="Android APK & GitHub Release"
+                className="w-12 h-12 rounded-2xl bg-[#312252] hover:bg-[#3E2B66] border-2 border-[#18F2B2] shadow-[0_4px_0_#1D1333] flex items-center justify-center text-[#18F2B2] cursor-pointer"
               >
                 <Download className="w-5 h-5" />
               </button>
@@ -2416,6 +2422,92 @@ export default function App() {
                 className="px-8 py-3.5 rounded-2xl bg-[#18F2B2] text-[#0B2620] font-display font-black text-xl uppercase cursor-pointer"
               >
                 DONE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          ANDROID APK & GITHUB ACTIONS RELEASE MODAL
+      ====================================================================== */}
+      {showApkModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="max-w-lg w-full max-h-[92vh] overflow-y-auto rounded-3xl bg-[#1E1732] border-2 border-[#18F2B2] p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-mono font-bold text-[#18F2B2] uppercase">
+                  GITHUB ACTIONS APK PIPELINE CONFIGURED
+                </div>
+                <h2 className="text-3xl font-display font-black tracking-wider text-white uppercase">
+                  PSY ANDROID APK & GITHUB
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowApkModal(false)}
+                className="w-11 h-11 rounded-2xl bg-[#2E224A] border-2 border-[#5E4694] flex items-center justify-center text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Direct Install to Device (PWA / Android Standalone) */}
+            {!isInstalled && (
+              <div className="p-4 rounded-2xl bg-[#140F24] border-2 border-[#18F2B2]/60 space-y-2.5">
+                <div className="text-xs font-mono font-bold text-[#18F2B2] uppercase">
+                  OPTION 1 · DIRECT PHONE INSTALL
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Install <strong>PSY</strong> directly onto your phone home screen right now in fullscreen standalone mode, or use the automated GitHub Actions `.apk` builder below.
+                </p>
+                {isInstallable ? (
+                  <button
+                    onClick={async () => {
+                      const ok = await install();
+                      if (ok) showToast('PSY installed to device home screen!');
+                    }}
+                    className="w-full py-3 rounded-xl bg-[#18F2B2] text-[#0B2620] font-display font-black text-lg uppercase cursor-pointer"
+                  >
+                    INSTALL PSY APP NOW
+                  </button>
+                ) : isIOS ? (
+                  <div className="text-xs font-mono text-amber-300">
+                    On iOS Safari: Tap Share → Add to Home Screen.
+                  </div>
+                ) : (
+                  <div className="text-xs font-mono text-slate-400">
+                    Standalone Web App Manifest & Service Worker active (`com.psy.arena`).
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* GitHub Actions APK Build Workflow Details */}
+            <div className="p-4 rounded-2xl bg-[#140F24] border border-[#382B59] space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold text-[#B67CFF] uppercase">
+                  OPTION 2 · GITHUB ACTIONS APK RELEASE
+                </span>
+                <span className="text-[11px] font-mono text-[#18F2B2] font-bold">
+                  READY IN REPO
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                This project includes <code className="text-amber-300">.github/workflows/build-apk.yml</code> and <code className="text-amber-300">capacitor.config.json</code> (<code className="text-sky-300">com.psy.arena</code>).
+              </p>
+              <ol className="text-xs text-slate-200 space-y-1.5 list-decimal list-inside font-mono">
+                <li>Push or export this project to your GitHub repository.</li>
+                <li>GitHub Actions automatically runs <strong>Build Android APK (PSY Arena)</strong> on every push to <code className="text-[#18F2B2]">main</code> / <code className="text-[#18F2B2]">master</code>.</li>
+                <li>Download <strong>PSY-Arena.apk</strong> directly from your repo&apos;s <strong>GitHub Releases (latest-apk)</strong> or workflow <strong>Artifacts</strong>!</li>
+              </ol>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-1">
+              <button
+                onClick={() => setShowApkModal(false)}
+                className="px-7 py-3 rounded-2xl bg-[#18F2B2] text-[#0B2620] font-display font-black text-lg uppercase cursor-pointer"
+              >
+                GOT IT
               </button>
             </div>
           </div>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="#17112B" />
+  <rect x="24" y="24" width="464" height="464" rx="96" fill="#241744" stroke="#18F2B2" stroke-width="14" />
+  <circle cx="256" cy="210" r="106" fill="#D99B66" stroke="#09070B" stroke-width="16" />
+  <path d="M150 185C145 105 205 64 276 68C310 68 332 54 346 44C350 74 332 100 318 106C356 122 366 164 358 196Z" fill="#1E1926" stroke="#09070B" stroke-width="14" stroke-linejoin="round" />
+  <rect x="172" y="176" width="72" height="48" rx="12" fill="#E2E8F0" stroke="#A78BFA" stroke-width="10" />
+  <rect x="268" y="176" width="72" height="48" rx="12" fill="#E2E8F0" stroke="#A78BFA" stroke-width="10" />
+  <circle cx="208" cy="200" r="14" fill="#1E293B" />
+  <circle cx="304" cy="200" r="14" fill="#1E293B" />
+  <path d="M204 244Q256 286 308 244Z" fill="#FFFFFF" stroke="#09070B" stroke-width="12" stroke-linejoin="round" />
+  <rect x="114" y="164" width="38" height="82" rx="18" fill="#17212B" stroke="#09070B" stroke-width="12" />
+  <rect x="128" y="180" width="10" height="50" rx="5" fill="#18F2B2" />
+  <rect x="360" y="164" width="38" height="82" rx="18" fill="#17212B" stroke="#09070B" stroke-width="12" />
+  <rect x="374" y="180" width="10" height="50" rx="5" fill="#18F2B2" />
+  <rect x="92" y="346" width="328" height="106" rx="28" fill="#0F0C1B" stroke="#B67CFF" stroke-width="10" />
+  <text x="256" y="422" text-anchor="middle" fill="#18F2B2" font-size="88" font-weight="900" font-family="sans-serif" letter-spacing="8">PSY</text>
+</svg>

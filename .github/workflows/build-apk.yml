@@ -1,0 +1,79 @@
+name: Build Android APK (PSY Arena)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-android-apk:
+    name: Build & Publish PSY-Arena.apk
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Set up JDK 21 for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Web Dependencies & Build PSY Web Bundle
+        run: |
+          npm install
+          npm run build
+
+      - name: Add Capacitor Android Platform & Sync Assets
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android --no-save
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      - name: Build Android Debug APK with Gradle
+        working-directory: ./android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Rename APK to PSY-Arena.apk
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk PSY-Arena.apk
+
+      - name: Upload PSY-Arena.apk to GitHub Actions Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PSY-Arena-APK
+          path: PSY-Arena.apk
+          if-no-files-found: error
+
+      - name: Publish PSY-Arena.apk to GitHub Releases
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-apk
+          name: "PSY Arena — Latest Android APK"
+          body: |
+            ### PSY — 2D Tactical Jetpack Arena (Android APK)
+            - **Operatives**: Parth (`P`), Siddharth (`S`), and Yug (`Y`)
+            - **Features**: Sniper Scope Zoom-Out (`1X` -> `0.5X`), Ground Weapon Pickups, 10-Medkit Instant Heal Inventory, and 5 Companion Pets (**1. Sheru**, **2. Wolfs**, **3. Draky**, **4. Pegasus**, **5. Poink**).
+            - Download **`PSY-Arena.apk`** below and install directly on any Android device.
+          files: PSY-Arena.apk
+          prerelease: false
